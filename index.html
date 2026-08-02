@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест: Охрана «Рубин» — 30 вопросов</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .quiz-wrapper {
+    background: rgba(255,255,255,0.03);
+    padding: 24px;
+    border-radius: 16px;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .quiz-header { text-align: center; margin-bottom: 20px; }
+  .quiz-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.6rem;
+    color: #ff6b6b;
+    text-shadow: 0 0 10px rgba(255,107,107,0.4);
+  }
+  .quiz-subtitle { color: #a0a0c0; font-size: 0.95rem; }
+  .progress-container {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    height: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #ff4757, #ff6b81);
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 12px;
+  }
+  .question-counter {
+    text-align: right;
+    color: #ff6b81;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+  }
+  .question-text {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border-left: 4px solid #ff4757;
+  }
+  .answers-grid { display: flex; flex-direction: column; gap: 12px; }
+  .answer-btn {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff;
+    border: none;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+    width: 100%;
+  }
+  .answer-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220,38,38,0.4);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+  .answer-btn:active:not(:disabled) { transform: translateY(0); }
+  .answer-btn:disabled { cursor: default; opacity: 0.9; }
+  .answer-btn.correct {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    box-shadow: 0 0 20px rgba(22,163,74,0.4);
+  }
+  .answer-btn.wrong {
+    background: linear-gradient(135deg, #7f1d1d, #450a0a) !important;
+    animation: glitch 0.3s ease;
+  }
+  @keyframes glitch {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+  .start-screen, .result-screen { text-align: center; padding: 40px 20px; }
+  .start-btn, .restart-btn {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: #fff;
+    border: none;
+    padding: 18px 48px;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-top: 20px;
+    box-shadow: 0 8px 24px rgba(220,38,38,0.3);
+  }
+  .start-btn:hover, .restart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(220,38,38,0.5);
+  }
+  .score-display {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ff6b6b;
+    margin: 20px 0;
+    text-shadow: 0 0 20px rgba(255,107,107,0.3);
+  }
+  .result-message {
+    font-size: 1.1rem;
+    color: #c0c0d0;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .hidden { display: none; }
+  .emoji { font-size: 1.3em; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<div class="quiz-wrapper" id="quizApp">
+  <div class="start-screen" id="startScreen">
+    <div class="quiz-header">
+      <h2>🛡️ Тест: Охрана «Рубин»</h2>
+      <div class="quiz-subtitle">30 вопросов по легендарной стенограмме.<br>Проверь, не выглядишь ли ты дураком!</div>
+    </div>
+    <p style="color:#a0a0c0; margin: 20px 0;">
+      ⚠️ Красные кнопки — твой выбор.<br>
+      🔊 Неправильный ответ = звуковой глюк.<br>
+      🧠 Главное — не бояться ошибаться!
+    </p>
+    <button class="start-btn" onclick="startQuiz()">Начать тест</button>
+  </div>
+
+  <div class="quiz-screen hidden" id="quizScreen">
+    <div class="question-counter" id="questionCounter">Вопрос 1 / 30</div>
+    <div class="progress-container">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="question-text" id="questionText"></div>
+    <div class="answers-grid" id="answersGrid"></div>
+  </div>
+
+  <div class="result-screen hidden" id="resultScreen">
+    <div class="quiz-header"><h2>🏁 Результат</h2></div>
+    <div class="score-display" id="scoreDisplay">0/30</div>
+    <div class="result-message" id="resultMessage"></div>
+    <button class="restart-btn" onclick="restartQuiz()">Пройти ещё раз</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const questions = [
+    { q: "Что хранится на 7 посту с надписью «вскрывать при экстренной ситуации»?", a: ["Ключи от магазина", "Пицца для курьеров", "Запасные мозги оператора"], correct: 0 },
+    { q: "Какие каски лежали на посту 1 августа, которые «пока оставить»?", a: ["Четыре белые и две серые", "Только розовые каски", "Каски с рогами для викингов"], correct: 0 },
+    { q: "Кто такой «Рубин 1» в программе сопровождения охраны?", a: ["Охранник", "Красный камень в лифте", "Новый сорт яблок для шефа"], correct: 0 },
+    { q: "Кто такой «Рубин 2»?", a: ["Водитель охранника", "Вторая попытка не выглядеть дураком", "Драгоценность из 40-го этажа"], correct: 0 },
+    { q: "Почему коллектив перепутал охранника с няней при встрече?", a: ["Мозг по шаблону работает и все боятся выглядеть дураком", "Няня была в бронежилете", "Охранник притворился ребёнком"], correct: 0 },
+    { q: "Что случилось с лифтом на -3 этаже во время важного приезда?", a: ["Сбой системы, просадка напряжения", "Лифт улетел на Марс", "В лифте открыли библиотеку"], correct: 0 },
+    { q: "Какой главный совет дал начальник по поводу ошибок?", a: ["Лучше дураком выйти, чем потом остаться без работы", "Ошибается тот, кто не пьёт кофе", "Дуракам здесь не место — увольняем всех"], correct: 0 },
+    { q: "Чем был занят оператор, когда консьерж отдал ключи неизвестной женщине?", a: ["Принимал пакет от курьера", "Спасал котёнка с дерева", "Писал стихи о Рубине"], correct: 0 },
+    { q: "Какой номер машины подъехал к апартаментам, когда «все выдохнули» после уезда шефа?", a: ["760-я", "666-я", "007 Бонда"], correct: 0 },
+    { q: "Что услышал охраняемый человек из переговорного устройства в застрявшем лифте?", a: ["Визгливый нервный голос диспетчера", "Колыбельную от Путина", "Рекламу страховки от просадок"], correct: 0 },
+    { q: "Что сделал сотрудник с пистолетом ночью на посту?", a: ["Разобрал его «посмотреть изнутри»", "Научил его говорить «доброе утро»", "Покрасил в розовый цвет"], correct: 0 },
+    { q: "Что произошло, когда сотрудник собирал пистолет обратно?", a: ["Фишка ствольной коробки встала неправильно, приклад не складывался", "Пистолет превратился в тыкву", "Собрал идеально и получил премию"], correct: 0 },
+    { q: "Почему, по мнению начальника, старики чаще стреляют случайно из оружия?", a: ["Замыливание глаз — мозг в другом месте", "У них дрожат руки от волнения", "Они специально тренируют рефлексы"], correct: 0 },
+    { q: "Что произошло на 9 посту, за что всех похвалили?", a: ["Сработала пожарная тревога — тренировка", "Открыли ночной клуб", "Нашли клад с белыми касками"], correct: 0 },
+    { q: "Сколько команд действует при сбое лифта по протоколу?", a: ["Три команды", "Сто восемьдесят две", "Одна — «Бежать кто куда может»"], correct: 0 },
+    { q: "Какую команду должен дать старший при сбое лифта?", a: ["Внимание! Бой!", "Караул! Все пропало!", "Само пройдёт, не замечайте"], correct: 0 },
+    { q: "Почему информация о прибытии Рубина не дошла до конечного пункта?", a: ["Помощник не переслал, старший не прочитал SMS", "Съела голубь", "Рубин был невидимкой"], correct: 0 },
+    { q: "Как начальник описал состояние мозга оператора, принимавшего курьера?", a: ["Мозги были отключены в другую сторону", "Мозг был на высоте 66-го этажа", "Мозг обновился до версии 2.0"], correct: 0 },
+    { q: "Что делал Юра в напряжённый день, когда «все стояли в напряжении»?", a: ["Не кушал, сидел в лифтах туда-сюда", "Ел пиццу и смотрел сериалы", "Спал в каске на 9 посту"], correct: 0 },
+    { q: "Сколько управляющая компания заплатила за новый бесперебойник?", a: ["50 миллионов", "Три копейки и леденец", "Один рубин"], correct: 0 },
+    { q: "Когда появится новая бесперебойная схема на объекте?", a: ["Сентябрь — начало декабря", "Вчера, но забыли включить", "После победы над просадками напряжения"], correct: 0 },
+    { q: "Что делал мужчина со смартфоном у кортежа, что увидел шеф?", a: ["Снимал на камеру проезжающую машину", "Звонил маме", "Играл в Тетрис"], correct: 0 },
+    { q: "Как нужно действовать, если кто-то снимает охраняемого вблизи?", a: ["Подойти, отвлечь внимание, спросить дорогу в библиотеку", "Выбить телефон каратэ-ударом", "Закричать «Папарацци!»"], correct: 0 },
+    { q: "Что убирают на 6 посту, когда приезжает шеф, и ставят обратно, когда уезжает?", a: ["Столики", "Сотрудников", "Сами себя"], correct: 0 },
+    { q: "Куда, по словам начальника, должна проходить вся информация?", a: ["К старшему смены", "В группу «Охранники анонимные»", "На Авито"], correct: 0 },
+    { q: "Что сотрудник сказал жене про подписанный контракт с Вооружёнными силами?", a: ["Что его «на работу доставят»", "Что он стал космонавтом", "Что подписал договор на доставку пиццы"], correct: 0 },
+    { q: "Сколько патронов положил сотрудник в магазин при проверке?", a: ["Восемь", "Сто", "Ноль — он их потерял"], correct: 0 },
+    { q: "Что произошло при «молниеносной» тактической перезарядке?", a: ["Патрон не дослали, следующий курок — пуля пошла", "Затвор превратился в бабочку", "Пистолет запел гимн"], correct: 0 },
+    { q: "Какой совет дал начальник по подготовке к смене?", a: ["Придумай себе три ситуации и сам на них ответь", "Спи и не замечай ничего", "Чем больше ошибок, тем выше премия"], correct: 0 },
+    { q: "Что главное в работе охраны, по финальной мудрости начальника?", a: ["Не бояться выглядеть дураком и переспросить", "Всегда быть крутым, как Денис", "Никогда не думать — только стоять"], correct: 0 }
+  ];
+
+  let current = 0, score = 0, audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  function playGlitch() {
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const dist = audioCtx.createWaveShaper();
+    function makeDistortion(amount) {
+      const k = amount, n = 44100, curve = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = (Math.PI + k) * x / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+    dist.curve = makeDistortion(50);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.3);
+    gain.gain.setValueAtTime(0.3, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    osc.connect(dist); dist.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(t); osc.stop(t + 0.35);
+    const bufferSize = audioCtx.sampleRate * 0.1;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.2, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+    noise.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+    noise.start(t);
+  }
+
+  function playSuccess() {
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, t);
+    osc.frequency.setValueAtTime(659, t + 0.1);
+    gain.gain.setValueAtTime(0.2, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(t); osc.stop(t + 0.3);
+  }
+
+  function updateProgress() {
+    document.getElementById('progressFill').style.width = ((current) / questions.length * 100) + '%';
+    document.getElementById('questionCounter').textContent = `Вопрос ${current + 1} / ${questions.length}`;
+  }
+
+  function showQuestion() {
+    const q = questions[current];
+    document.getElementById('questionText').textContent = q.q;
+    const grid = document.getElementById('answersGrid');
+    grid.innerHTML = '';
+    q.a.forEach((text, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.innerHTML = `<span class="emoji">🔴</span> ${text}`;
+      btn.onclick = () => handleAnswer(idx, btn);
+      grid.appendChild(btn);
+    });
+    updateProgress();
+  }
+
+  function handleAnswer(selected, btn) {
+    const q = questions[current];
+    const buttons = document.querySelectorAll('.answer-btn');
+    buttons.forEach(b => b.disabled = true);
+    if (selected === q.correct) {
+      score++;
+      btn.classList.add('correct');
+      btn.innerHTML = `<span class="emoji">✅</span> ${q.a[selected]}`;
+      playSuccess();
+    } else {
+      btn.classList.add('wrong');
+      btn.innerHTML = `<span class="emoji">💥</span> ${q.a[selected]}`;
+      playGlitch();
+      buttons[q.correct].classList.add('correct');
+      buttons[q.correct].innerHTML = `<span class="emoji">✅</span> ${q.a[q.correct]}`;
+    }
+    setTimeout(() => {
+      current++;
+      if (current < questions.length) showQuestion();
+      else showResults();
+    }, 1200);
+  }
+
+  function showResults() {
+    document.getElementById('quizScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.remove('hidden');
+    document.getElementById('scoreDisplay').textContent = `${score} / ${questions.length}`;
+    let msg = '';
+    if (score === 30) msg = "🏆 Идеально! Ты настоящий Рубин-1. Шеф бы гордился!";
+    else if (score >= 25) msg = "⭐ Отлично! Ты точно не выглядишь дураком. Можно идти на 7 пост за ключами.";
+    else if (score >= 20) msg = "👍 Неплохо! Но перечитай алгоритм — мозг по шаблону работает.";
+    else if (score >= 10) msg = "😬 Средненько. Ты точно не перепутал охранника с няней?";
+    else msg = "💀 Катастрофа! Ты бы ночью разобрал пистолет и не собрал обратно. Срочно на переподготовку!";
+    document.getElementById('resultMessage').innerHTML = msg;
+  }
+
+  window.startQuiz = function() {
+    initAudio();
+    current = 0; score = 0;
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.add('hidden');
+    document.getElementById('quizScreen').classList.remove('hidden');
+    showQuestion();
+  };
+  window.restartQuiz = function() { startQuiz(); };
+})();
+</script>
+
+</body>
+</html>
